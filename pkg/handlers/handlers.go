@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"hello-world/pkg/render"
+	"go-hello-world/pkg/render"
 	"net/http"
 )
 
