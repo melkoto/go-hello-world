@@ -2,17 +2,29 @@ package main
 
 import (
 	"fmt"
+	"github.com/alexedwards/scs/v2"
 	"go-hello-world/pkg/config"
 	"go-hello-world/pkg/handlers"
 	"go-hello-world/pkg/render"
 	"log"
 	"net/http"
+	"time"
 )
 
 const port = ":8080"
 
+var app config.AppConfig
+var session *scs.SessionManager
+
 func main() {
-	var app config.AppConfig
+
+	app.InProduction = false
+
+	session = scs.New()
+	session.Lifetime = 24 * time.Hour
+	session.Cookie.Persist = true
+	session.Cookie.SameSite = http.SameSiteLaxMode
+	session.Cookie.Secure = app.InProduction
 
 	tc, err := render.CreateTemplateCache()
 	app.TemplateCache = tc
