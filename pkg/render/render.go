@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"go-hello-world/pkg/config"
+	"go-hello-world/pkg/models"
 	"html/template"
 	"log"
 	"net/http"
@@ -18,8 +19,14 @@ func NewTemplate(a *config.AppConfig) {
 	app = a
 }
 
-func RenderTemplate(w http.ResponseWriter, tmpl string) {
-	tc := app.TemplateCache
+func RenderTemplate(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
+	var tc map[string]*template.Template
+
+	if app.UseCache {
+		tc = app.TemplateCache
+	} else {
+		tc, _ = CreateTemplateCache()
+	}
 
 	t, ok := tc[tmpl]
 	if !ok {
@@ -27,17 +34,12 @@ func RenderTemplate(w http.ResponseWriter, tmpl string) {
 	}
 
 	buf := new(bytes.Buffer)
-	_ = t.Execute(buf, nil)
+
+	_ = t.Execute(buf, td)
+
 	_, err := buf.WriteTo(w)
 	if err != nil {
 		fmt.Println("error writing template", err)
-	}
-
-	parsedFiles, _ := template.ParseFiles("./templates/" + tmpl)
-	err = parsedFiles.Execute(w, nil)
-	if err != nil {
-		fmt.Println("error parsing template", err)
-		return
 	}
 }
 
